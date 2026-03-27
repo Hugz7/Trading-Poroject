@@ -1,13 +1,6 @@
 # =============================================================================
 # CONFIG — COT Sensitivity Carbon Market
 # =============================================================================
-# Tous les paramètres du signal sont ici. C'est le seul fichier à modifier
-# pour ajuster les tickers, les poids, ou les seuils de décision.
-#
-# Pour trouver les bons tickers COT sur Bloomberg :
-#   → Tape le ticker du future (ex: MOc1 Comdty) puis COT <GO>
-#   → Ou cherche "ICE COT EUA" dans la search bar Bloomberg
-# =============================================================================
 
 try:
     import blpapi
@@ -18,47 +11,41 @@ except ImportError:
 
 CONFIG = {
 
-    # --- Tickers Prix ---
-    # MOc1 Comdty  = ICE EUA (EU Allowances) front-month futures
-    # UKAc1 Comdty = ICE UKA (UK Allowances) front-month futures
+    # --- Tickers Prix Bloomberg ---
+    # MO1 Comdty  = EUA Generic 1st Future (ICE, source ICE Index)
+    # UKE1 Comdty = UKA Generic 1st Future (ICE)
     "price_tickers": {
-        "EUA": "MOc1 Comdty",
-        "UKA": "UKAc1 Comdty",
+        "EUA": "MO1 Comdty",
+        "UKA": "UKE1 Comdty",
     },
 
-    # --- Tickers COT (Managed Money = hedge funds & asset managers) ---
-    # ⚠️  Vérifie ces tickers sur ton terminal Bloomberg avec COT <GO>
-    "cot_tickers": {
-        "EUA": {
-            "mm_long":  "MOAOMML Index",   # EUA Managed Money Longs
-            "mm_short": "MOAOMMS Index",   # EUA Managed Money Shorts
-        },
-        "UKA": {
-            "mm_long":  "UKAOMML Index",   # UKA Managed Money Longs
-            "mm_short": "UKAOMMS Index",   # UKA Managed Money Shorts
-        },
-    },
+    # --- COT : géré via fichiers Excel dans cot_data/ ---
+    # Exporte chaque vendredi depuis Bloomberg :
+    #   MO1 Comdty  COT → Export → BDP → sauvegarder sous cot_data/cot_eua.xlsx
+    #   UKE1 Comdty COT → Export → BDP → sauvegarder sous cot_data/cot_uka.xlsx
+    # Pour accumuler l'historique, renomme les fichiers :
+    #   cot_eua_20260327.xlsx, cot_eua_20260320.xlsx, etc.
 
     # --- Paramètres des signaux ---
-    "lookback_weeks":    52,    # Fenêtre glissante pour OLS et z-score
-    "momentum_ma_weeks":  4,    # Moyenne mobile du COT Momentum (semaines)
-    "zscore_entry":       1.5,  # Seuil z-score pour signaler un extrême (σ)
+    "lookback_weeks":    52,
+    "momentum_ma_weeks":  4,
+    "zscore_entry":       1.5,
 
     # --- Poids des 3 signaux (doivent sommer à 1.0) ---
     "weights": {
-        "ols":      0.40,   # Lien empirique direct positioning → prix
-        "momentum": 0.35,   # Tendance du flux de positioning
-        "zscore":   0.25,   # Contexte de positionnement extrême
+        "ols":      0.40,
+        "momentum": 0.35,
+        "zscore":   0.25,
     },
 
     # --- Seuils du signal composite ---
-    "bull_threshold":  0.20,   # Score > +0.20 → BULL
-    "bear_threshold": -0.20,   # Score < -0.20 → BEAR  (entre les deux → HOLD)
+    "bull_threshold":  0.20,
+    "bear_threshold": -0.20,
 
     # --- Connexion Bloomberg ---
     "bbg_host": "localhost",
     "bbg_port": 8194,
 
     # --- Période historique ---
-    "start_date": "2019-01-01",   # Format YYYY-MM-DD
+    "start_date": "2019-01-01",
 }
